@@ -56,7 +56,7 @@ public class AppointmentService {
             @RequestParam Long patientId,
             @RequestParam LocalDateTime date
     ){
-        return appointmentRepository.findByPatientAndDate(patientId, date);
+        return appointmentRepository.findByPatient_IdAndDate(patientId, date);
     }
 
     public boolean deleteIfPending(Long appointmentId){
@@ -72,7 +72,7 @@ public class AppointmentService {
     }
 
     public Appointment createAppointment(Appointment appt){
-        
+
         Optional<Appointment> optional = this.getAllAppointmentsByRoomAndDate(appt.getRoom().getRoomId(), appt.getDate());
         //No en el mismo consultorio ni a la misma hora
         if(optional.isPresent()){
