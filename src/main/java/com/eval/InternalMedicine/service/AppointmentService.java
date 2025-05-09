@@ -10,13 +10,11 @@ import com.eval.InternalMedicine.repository.AppointmentRepository;
 import com.eval.InternalMedicine.repository.DoctorRepository;
 import com.eval.InternalMedicine.repository.PatientRepository;
 import com.eval.InternalMedicine.repository.RoomRepository;
-import org.hibernate.grammars.hql.HqlParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -42,14 +40,14 @@ public class AppointmentService {
     public Optional<Appointment>getAllAppointmentsByDoctorIdAndDate(
             @RequestParam Long id,
             @RequestParam LocalDateTime date){
-        return appointmentRepository.findByDoctorIdAndDate(id, date);
+        return appointmentRepository.findByDoctor_IdAndDate(id, date);
     }
 
     public Optional<Appointment> getAllAppointmentsByRoomAndDate(
             @RequestParam Long roomId,
             @RequestParam LocalDateTime date
     ){
-        return appointmentRepository.findByRoomAndDate(roomId, date);
+        return appointmentRepository.findByRoom_IdAndDate(roomId, date);
     }
 
     public Optional<Appointment> findAppointmentsByPatientAndDate(
