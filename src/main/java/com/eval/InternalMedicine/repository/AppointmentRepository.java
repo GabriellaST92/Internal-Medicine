@@ -16,7 +16,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Optional<Appointment> findByDoctorIdAndDate(Long doctorId, LocalDateTime date);
     Optional<Appointment> findByRoomAndDate(Long roomId, LocalDateTime date);
     Optional<Appointment> findByPatientAndDate(Long patientId, LocalDateTime date);
-    @Query("SELECT * FROM Appointment a WHERE a.date >= :start AND a.date <= :end AND a.doctor = :doctor")
-    List<Appointment>findAppointmentsByDoctorAndDay(@Param("start") LocalDateTime start, @Param("end")LocalDateTime end, @Param("doctor") Doctor doctor);
+    @Query("SELECT a FROM Appointment a WHERE a.date >= :start AND a.date <= :end AND a.doctor = :doctor")
+    List<Appointment> findAppointmentsByDoctorAndDay(@Param("start") LocalDateTime start,
+                                                     @Param("end") LocalDateTime end,
+                                                     @Param("doctor") Doctor doctor);
 }
 
