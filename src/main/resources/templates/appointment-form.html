@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html"
+      xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>New Appointment</title>
+</head>
+<body>
+    <h2>Schedule Appointment</h2>
+    <form th:action="@{/appointments}" method="post" th:object="${appointment}">
+        <label>Date:</label>
+        <input type="date" th:field="*{date}" required><br/>
+
+        <label>Doctor:</label>
+        <select th:field="*{doctor} required">
+            <option th:each="doc : ${doctor}"
+                    th:value="{doc.id}"
+                    th:text="${doc.name}">Doctor</option>
+        </select></br>
+
+        <label>Patient</label>
+        <select th:field="*{patient} required">
+            <option th:each="pat : ${patient}"
+                    th:value="{pat.id}"
+                    th:text="${pat.name}">Patient</option>
+        </select></br>
+
+        <button type="submit">Create Appointment</button>
+    </form>
+
+</body>
+</html>

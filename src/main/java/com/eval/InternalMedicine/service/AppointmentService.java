@@ -40,14 +40,14 @@ public class AppointmentService {
     public Optional<Appointment>getAllAppointmentsByDoctorIdAndDate(
             @RequestParam Long id,
             @RequestParam LocalDateTime date){
-        return appointmentRepository.findByDoctor_IdAndDate(id, date);
+        return appointmentRepository.findByDoctorIdAndDate(id, date);
     }
 
     public Optional<Appointment> getAllAppointmentsByRoomAndDate(
             @RequestParam Long roomId,
             @RequestParam LocalDateTime date
     ){
-        return appointmentRepository.findByRoom_IdAndDate(roomId, date);
+        return appointmentRepository.findByRoomIdAndDate(roomId, date);
     }
 
     public Optional<Appointment> findAppointmentsByPatientAndDate(
@@ -69,30 +69,51 @@ public class AppointmentService {
         return false;
     }
 
-    public Appointment createAppointment(Appointment appt){
 
-        Optional<Appointment> optional = this.getAllAppointmentsByRoomAndDate(appt.getRoom().getRoomId(), appt.getDate());
-        //No en el mismo consultorio ni a la misma hora
+
+    public Appointment createAppointment(Long roomId, Long doctorId, LocalDateTime date, Long patientId, String status) {
+
+        Appointment appt = new Appointment();
+        Room room = roomRepository.findById(roomId).orElseThrow();
+        Doctor doctor = doctorRepository.findById(doctorId).orElseThrow();
+        Patient patient = patientRepository.findById(patientId).orElseThrow();
+
+        appt.setStatus(status);
+        appt.setRoom(room);
+        appt.setDate(date);
+        appt.setDoctor(doctor);
+        appt.setPatient(patient);
+
+        return saveAppointment(appt);
+    }
+
+    public Appointment saveAppointment(Appointment appt){
+
+        Optional<Appointment> optional;
+
+        optional = this.getAllAppointmentsByRoomAndDate(appt.getRoom().getId(), appt.getDate());
+        // Validar que no haya otra cita en el mismo consultorio y a la misma hora
         if(optional.isPresent()){
             throw  new TimeConflictException("The requested room is not available at the selected time");
         }
-        //No para el mismo doctor a la misma hora
-        optional = this.getAllAppointmentsByDoctorIdAndDate(appt.getDoctor().getDoctorId(), appt.getDate());
+        // Validar que el doctor no tenga otra cita a la misma hora
+        optional = this.getAllAppointmentsByDoctorIdAndDate(appt.getDoctor().getId(), appt.getDate());
         if(optional.isPresent()){
             throw  new TimeConflictException("The doctor requested is not available at the selected time");
         }
-        //No al mismo paciente a la misma hora ni con menos de 2 horas de diferencia el mismo día
+        // Validar que el paciente no tenga otra cita a la misma hora o dentro de 2 horas el mismo día
         optional= this.findAppointmentsByPatientAndDate(appt.getPatient().getId(), appt.getDate());
 
-        if(optional.isPresent()){
-            throw  new InvalidAppointmentException("The patient have an appointment in the selected time, please select a different time");
-        }
-        else{
-            Duration difference = Duration.between(optional.get().getDate(), appt.getDate());
+        optional.ifPresent(existingAppointment->{
+            Duration difference = Duration.between(existingAppointment.getDate(), appt.getDate());
             if( difference.toHours() < 2 ){
                 throw  new InvalidAppointmentException("You cannot schedule this appointment. The patient already has another appointment within two hours of the selected time");
             }
-        }
+            else{
+                throw  new InvalidAppointmentException("The patient have an appointment in the selected time, please select a different time");
+            }
+
+        });
 
         //Un mismo doctor solo puede tener hasta 8 citas al día
         List<Appointment>doctorsAppointmentsOfDay = this.getAppointmentsByDoctorAndDay(appt.getDoctor(), appt.getDate());
@@ -112,21 +133,16 @@ public class AppointmentService {
         appointment.setDate(appt.getDate());
         appointment.setRoom(appt.getRoom());
         if(appt.getDoctor() != null){
-            Doctor doctor = doctorRepository.findById(appt.getDoctor().getDoctorId())
-                    .orElseThrow(()-> new RuntimeException(("Doctor not found")));
-            appointment.setDoctor(doctor);
+
+            appointment.setDoctor(appt.getDoctor());
         }
         if(appt.getPatient() != null){
-            Patient patient = patientRepository.findById(appt.getPatient().getId())
-                    .orElseThrow(()-> new RuntimeException(("Patient not found")));
-            appointment.setPatient(patient);
+            appointment.setPatient(appt.getPatient());
         }
         if(appt.getRoom() != null){
-            Room room = roomRepository.findById(appt.getRoom().getRoomId())
-                    .orElseThrow(()-> new RuntimeException(("Room not found")));
-            appointment.setRoom(room);
+            appointment.setRoom(appt.getRoom());
         }
-        return createAppointment(appointment);
+        return saveAppointment(appointment);
     }
 
 }

@@ -19,10 +19,23 @@ public class Appointment {
     @ManyToOne
     private Room room;
     @ManyToOne
+    @JoinColumn(name = "doctor_id")
     private Doctor doctor;
     LocalDateTime date;
     @ManyToOne
     private Patient patient;
     private String status;
+
+    /*public Appointment(Long roomId, Long doctorId, LocalDateTime date, Long patientId, String status) {
+
+        this.room = room;
+        this.doctor = doctor;
+        this.date = date;
+        this.patient = patient;
+        this.status = status;
+    }
+
+
+    * */
 
 }

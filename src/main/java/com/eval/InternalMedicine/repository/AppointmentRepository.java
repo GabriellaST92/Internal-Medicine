@@ -13,8 +13,8 @@ import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-    Optional<Appointment> findByDoctor_IdAndDate(Long doctorId, LocalDateTime date);
-    Optional<Appointment> findByRoom_IdAndDate(Long roomId, LocalDateTime date);
+    Optional<Appointment> findByDoctorIdAndDate(Long doctorId, LocalDateTime date);
+    Optional<Appointment> findByRoomIdAndDate(Long id, LocalDateTime date);
     Optional<Appointment> findByPatient_IdAndDate(Long patientId, LocalDateTime date);
     @Query("SELECT a FROM Appointment a WHERE a.date >= :start AND a.date <= :end AND a.doctor = :doctor")
     List<Appointment> findAppointmentsByDoctorAndDay(@Param("start") LocalDateTime start,
